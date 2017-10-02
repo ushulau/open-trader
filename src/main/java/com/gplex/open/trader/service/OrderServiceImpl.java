@@ -3,6 +3,7 @@ package com.gplex.open.trader.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gplex.open.trader.domain.Order;
 import com.gplex.open.trader.domain.TimeResponse;
+import com.gplex.open.trader.rest.BaseSecureClient;
 import com.gplex.open.trader.utils.Security;
 import com.gplex.open.trader.utils.Utils;
 import org.slf4j.Logger;
@@ -19,19 +20,18 @@ import java.util.Date;
 /**
  * Created by Vlad S. on 9/14/17.
  */
-public class OrderServiceImpl {
+public class OrderServiceImpl extends BaseSecureClient{
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private static final Logger logger = LoggerFactory.getLogger(OrderServiceImpl.class);
-    private RestTemplate restTemplate;
-    private Security sec;
-    private final String key = "765ee5be8520e3d7718b544b44d761d1";
-    private final String secret = "jsxvksOKUfwk1nhiC3q7GoGyokCcg52YZ8YH/x6JKLKSYeJJi6IC6wNNztf2wo/fM9XoVei0ClANpLV191oW2w==";
-    private final String passphrase = "test";
-    private final String baseUrl = "https://api-public.sandbox.gdax.com";
+    //private RestTemplate restTemplate;
+    //private Security sec;
 
-    public OrderServiceImpl(RestTemplate restTemplate, Security sec) {
-        this.restTemplate = restTemplate;
-        this.sec = sec;
+    private final String baseUrl;
+
+
+    public OrderServiceImpl(RestTemplate restTemplate, Security sec, String key, String passphrase, String baseUrl) {
+        super(restTemplate, sec, key, passphrase);
+        this.baseUrl = baseUrl;
     }
 
     private void buyOrder(String product, Double price, Double size){

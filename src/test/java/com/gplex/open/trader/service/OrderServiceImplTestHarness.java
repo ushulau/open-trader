@@ -4,10 +4,17 @@ import com.gplex.open.trader.domain.TimeResponse;
 import com.gplex.open.trader.utils.Security;
 import com.gplex.open.trader.utils.Utils;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.SpringBootConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.web.client.RestTemplate;
 
+import javax.annotation.PostConstruct;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import javax.management.RuntimeErrorException;
@@ -21,12 +28,25 @@ import static org.junit.Assert.assertTrue;
 /**
  * Created by Vlad S. on 9/15/17.
  */
+@SpringBootTest
+@SpringBootConfiguration
+@RunWith(SpringJUnit4ClassRunner.class)
+@TestPropertySource("classpath:gdax-keys.properties")
 public class OrderServiceImplTestHarness {
     private static final Logger logger = LoggerFactory.getLogger(OrderServiceImplTestHarness.class);
     RestTemplate rt = new RestTemplate();
-    private static final String  privateKey = "jsxvksOKUfwk1nhiC3q7GoGyokCcg52YZ8YH/x6JKLKSYeJJi6IC6wNNztf2wo/fM9XoVei0ClANpLV191oW2w==";
-    Security sec = new Security(privateKey);
-    OrderServiceImpl os = new OrderServiceImpl(rt, sec);
+    @Value("${gdax.secret}")
+    private String  privateKey;
+    @Value("${gdax.key}")
+    private String  key;
+    @Value("${gdax.passphrase}")
+    private String  passphrase;
+    @Value("${gdax.api.baseUrl}")
+    private String  baseUrl;
+
+
+    private Security sec;
+    private OrderServiceImpl os;
     public static Mac SHARED_MAC;
 
     static {
@@ -36,6 +56,12 @@ public class OrderServiceImplTestHarness {
             nsaEx.printStackTrace();
         }
     }
+    @PostConstruct
+    private void postConstruct(){
+        sec = new Security(privateKey);
+        os = new OrderServiceImpl(rt, sec, key, passphrase, baseUrl);
+    }
+
     public String generateSignature(String requestPath, String method, String body, String timestamp) {
         try {
             String prehash = timestamp + method.toUpperCase() + requestPath + body;
