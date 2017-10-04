@@ -5,7 +5,6 @@ import com.gplex.open.trader.domain.Order;
 import com.gplex.open.trader.domain.TimeResponse;
 import com.gplex.open.trader.rest.BaseSecureClient;
 import com.gplex.open.trader.utils.Security;
-import com.gplex.open.trader.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.*;
@@ -80,31 +79,9 @@ public class OrderServiceImpl extends BaseSecureClient{
         MultiValueMap<String, String> parameterMap = new LinkedMultiValueMap<String, String>();
         String requestPath = this.baseUrl +"/accounts";
         try {
-            HttpHeaders headers = new HttpHeaders();
-            //headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-            String ts = Utils.getTs();
-            //headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.add("accept", "application/json");
-            headers.add("content-type", "application/json");
-            headers.set("User-Agent","open-trader");
-            headers.add("CB-ACCESS-KEY",this.key);
-            headers.add("CB-ACCESS-SIGN", sec.signGET(ts, "/accounts"));
-            headers.add("CB-ACCESS-TIMESTAMP",ts);
-            headers.add("CB-ACCESS-PASSPHRASE",this.passphrase);
-
-            //parameterMap.add(PARAMETER_CLIENT_ID, this.clientId);
-            //parameterMap.add(PARAMETER_CLIENT_SECRET, this.clientSecret);
-            //parameterMap.add(PARAMETER_GRANT_TYPE, GRANT_TYPE_CLIENT_CREDENTIALS);
-            /*if(this.oauthScope != null) {
-                parameterMap.add(PARAMETER_SCOPE, this.oauthScope);
-            }*/
-            Long tokenRetrievalStartTime = System.currentTimeMillis();
-            HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(parameterMap, headers);
-            ResponseEntity<ArrayList> result = restTemplate.exchange(requestPath, HttpMethod.GET, request, ArrayList.class);
-            //OAuthToken token = result.getBody();
-            //this.tokenRetrievalTime = tokenRetrievalStartTime;
+            ResponseEntity<ArrayList> result = executeGET(requestPath, ArrayList.class);
             logger.debug("response {}", result);
-           // return token;
+
         } catch (HttpStatusCodeException e) {
             logger.error("Unable to get response due to [" + e.getResponseBodyAsString() + "]");
         }
