@@ -2,6 +2,8 @@ package com.gplex.open.trader.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 /**
  * Created by Vlad S. on 10/4/17.
@@ -67,5 +69,10 @@ public class Account {
 
     public void setProfileId(String profileId) {
         this.profileId = profileId;
+    }
+
+    @Override
+    public String toString() {
+        return ReflectionToStringBuilder.toString(this, ToStringStyle.JSON_STYLE);
     }
 }

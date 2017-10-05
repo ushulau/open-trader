@@ -4,6 +4,7 @@ import com.gplex.open.trader.utils.Security;
 import com.gplex.open.trader.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -47,11 +48,13 @@ public class BaseSecureClient {
     }
 
 
-    private HttpEntity<MultiValueMap<String, String>> createGETRequest(String path) {
-        return createGETRequest(path, null);
+    private HttpEntity<MultiValueMap<String, String>> createGETRequest(String uri) throws URISyntaxException {
+        return createGETRequest(uri, null);
     }
 
-    private HttpEntity<MultiValueMap<String, String>> createGETRequest(String path, MultiValueMap<String, String> parameterMap) {
+    private HttpEntity<MultiValueMap<String, String>> createGETRequest(String url, MultiValueMap<String, String> parameterMap) throws URISyntaxException {
+        URI uri = new URI(url);
+        String path = uri.getPath();
         if (parameterMap == null) {
             parameterMap = new LinkedMultiValueMap<>();
         }
@@ -64,16 +67,25 @@ public class BaseSecureClient {
 
     public <T> ResponseEntity<T> executeGET(String requestPath, Class<T> responseType) {
         try {
-            URI uri = new URI(requestPath);
-            String path = uri.getPath();
-            HttpEntity<MultiValueMap<String, String>> request = createGETRequest(path);
-            return restTemplate.exchange(requestPath, HttpMethod.GET, request, responseType);
+            return restTemplate.exchange(requestPath, HttpMethod.GET, createGETRequest(requestPath), responseType);
 
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
         return null;
     }
+
+
+    public <T> ResponseEntity<T> executeGET(String requestPath,  ParameterizedTypeReference<T> responseType) {
+        try {
+                 return restTemplate.exchange(requestPath, HttpMethod.GET, createGETRequest(requestPath), responseType);
+
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 
 
     public <T> ResponseEntity<T> executeNotSignedGET(String requestPath, Class<T> responseType) {

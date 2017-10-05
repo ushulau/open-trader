@@ -1,5 +1,6 @@
 package com.gplex.open.trader.service;
 
+import com.gplex.open.trader.domain.Account;
 import com.gplex.open.trader.domain.TimeResponse;
 import com.gplex.open.trader.utils.Security;
 import com.gplex.open.trader.utils.Utils;
@@ -22,6 +23,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.Date;
+import java.util.List;
 
 import static org.junit.Assert.assertTrue;
 
@@ -36,14 +38,13 @@ public class OrderServiceImplTestHarness {
     private static final Logger logger = LoggerFactory.getLogger(OrderServiceImplTestHarness.class);
     RestTemplate rt = new RestTemplate();
     @Value("${gdax.secret}")
-    private String  privateKey;
+    private String privateKey;
     @Value("${gdax.key}")
-    private String  key;
+    private String key;
     @Value("${gdax.passphrase}")
-    private String  passphrase;
+    private String passphrase;
     @Value("${gdax.api.baseUrl}")
-    private String  baseUrl;
-
+    private String baseUrl;
 
     private Security sec;
     private AccountsServiceImpl os;
@@ -56,8 +57,9 @@ public class OrderServiceImplTestHarness {
             nsaEx.printStackTrace();
         }
     }
+
     @PostConstruct
-    private void postConstruct(){
+    private void postConstruct() {
         sec = new Security(privateKey);
         os = new AccountsServiceImpl(rt, sec, key, passphrase, baseUrl);
     }
@@ -77,38 +79,39 @@ public class OrderServiceImplTestHarness {
     }
 
 
-
     @Test
-    public void testConnection(){
-
-      os.listAccounts();
-
-
+    public void testConnection() {
+        List<Account> accounts = os.listAccounts();
+        logger.debug("{}", new Object[]{accounts});
     }
 
 
     @Test
-    public void testSecurity(){
+    public void testAccountConnection() {
+        List<Account> accounts = os.listAccounts();
+        for(Account ac: accounts){
+            Account account = os.getAnAccount(ac.getId());
+            logger.debug("account -> {}",account);
+        }
+
+    }
+
+
+
+    @Test
+    public void testSecurity() {
         String ts = Utils.getTs();
         String sec1 = sec.signGET(ts, "/accounts");
         String sec2 = generateSignature("/accounts", "GET", "", ts);
-        logger.debug("Checking: {}\n{}\n{}", ts,sec1, sec2);
+        logger.debug("Checking: {}\n{}\n{}", ts, sec1, sec2);
         assertTrue(sec1.equals(sec2));
-
     }
-
 
     @Test
-    public void testTs(){
+    public void testTs() {
         Double ct = new Date().getTime() / 1000.0;
         TimeResponse ts = os.getTime();
-
-        logger.debug("{} ~ {}",String.format("%.3f",ct), String.format("%.3f",ts.getEpoch()));
-
-
-
+        logger.debug("{} ~ {}", String.format("%.3f", ct), String.format("%.3f", ts.getEpoch()));
     }
-
-
 
 }
