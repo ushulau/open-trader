@@ -46,7 +46,7 @@ public class OrderServiceImplTestHarness {
 
 
     private Security sec;
-    private OrderServiceImpl os;
+    private AccountsServiceImpl os;
     public static Mac SHARED_MAC;
 
     static {
@@ -59,7 +59,7 @@ public class OrderServiceImplTestHarness {
     @PostConstruct
     private void postConstruct(){
         sec = new Security(privateKey);
-        os = new OrderServiceImpl(rt, sec, key, passphrase, baseUrl);
+        os = new AccountsServiceImpl(rt, sec, key, passphrase, baseUrl);
     }
 
     public String generateSignature(String requestPath, String method, String body, String timestamp) {
@@ -81,7 +81,7 @@ public class OrderServiceImplTestHarness {
     @Test
     public void testConnection(){
 
-      os.getAccountInfo();
+      os.listAccounts();
 
 
     }
