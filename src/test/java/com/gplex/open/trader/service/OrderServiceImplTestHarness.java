@@ -91,7 +91,9 @@ public class OrderServiceImplTestHarness {
         List<Account> accounts = os.listAccounts();
         for(Account ac: accounts){
             Account account = os.getAnAccount(ac.getId());
-            logger.debug("account -> {}",account);
+            logger.debug("account -> \n{}",account);
+            logger.debug("holds -> \n{}", os.getHolds(ac.getId()));
+            logger.debug("history -> \n{}", os.getAccountHistory(ac.getId()));
         }
 
     }
