@@ -248,7 +248,7 @@ public class WebSocketTestHarness{
 
         @Override
         public void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-            logger.debug("Received: {}" , message);
+            logger.debug("Received: {}" , message.getPayload());
             //session.close();
         }
 
