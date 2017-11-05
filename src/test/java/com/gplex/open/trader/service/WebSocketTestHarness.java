@@ -77,7 +77,7 @@ public class WebSocketTestHarness{
     public static Accumulator ac_15m = new Accumulator(15*60000L);
     public static Accumulator ac_1h = new Accumulator(60*60000L);
     public static List<Accumulator> accumulators = new ArrayList<>();
-    final CountDownLatch disconnectLatch = new CountDownLatch(10);
+
     static {
         try {
             SHARED_MAC = Mac.getInstance("HmacSHA256");
@@ -109,7 +109,7 @@ public class WebSocketTestHarness{
     }
     @Test
     public void testWSClient() throws InterruptedException {
-
+        addAllAccumulators();
         final String WS_URI = "wss://ws-feed.gdax.com:443";
         WebSocketHandler handler = new SimpleClientWebSocketHandler();
         WebSocketConnectionManager manager = new WebSocketConnectionManager(new StandardWebSocketClient(), handler, WS_URI);
@@ -272,14 +272,14 @@ public class WebSocketTestHarness{
 
         @Override
         public void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-            logger.debug(message.getPayload());
+            //logger.debug(message.getPayload());
             try {
                 TickerMessage tm = Utils.MAPPER.readValue(message.getPayload(), TickerMessage.class);
                 for (Accumulator ac : accumulators) {
                     ac.add(tm);
                 }
             }catch (Exception e){
-                logger.error("can not parse");
+                logger.error("can not parse -> {}", message.getPayload());
             }
         }
 

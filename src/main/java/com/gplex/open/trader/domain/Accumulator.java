@@ -26,24 +26,24 @@ public class Accumulator {
     }
 
     public synchronized void add(TickerMessage tm) {
-         long l = tm.getTime().toInstant(ZoneOffset.UTC).toEpochMilli();
-         if(lastInterval == null){
-            lastInterval  = l;
+        long l = tm.getTime().toInstant(ZoneOffset.UTC).toEpochMilli();
+        if (lastInterval == null) {
+            lastInterval = l;
         }
 
-         long index = l / period;
-         long startPeriod = index * period;
+        long index = l / period;
+        long startPeriod = index * period;
 
-         if(!map.containsKey(index)){
-             map.put(index, new Candle(startPeriod, tm));
-             if(map.containsKey(index -1)){
-                 logger.info("\n{} -> {}", Utils.intervalString(period), map.get(index -1));
-             }
-         }else{
-             Candle candle = map.get(index);
-             candle.add(tm);
-         }
-     }
+        if (!map.containsKey(startPeriod)) {
+            map.put(startPeriod, new Candle(startPeriod, tm));
+            if (map.containsKey(startPeriod - period)) {
+                logger.info("\n{} -> {}", Utils.intervalString(period), map.get(startPeriod - period));
+            }
+        } else {
+            Candle candle = map.get(startPeriod);
+            candle.add(tm);
+        }
+    }
 
     public Map<Long, Candle> getMap() {
         return map;
