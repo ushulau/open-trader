@@ -1,7 +1,6 @@
 package com.gplex.open.trader;
 
-import com.gplex.open.trader.constant.Intervals;
-import com.gplex.open.trader.constant.Products;
+import com.gplex.open.trader.constant.Const;
 import com.gplex.open.trader.engine.Engine;
 import com.gplex.open.trader.service.AccountsServiceImpl;
 import org.slf4j.Logger;
@@ -37,7 +36,7 @@ public class Application implements CommandLineRunner {
 
 
 
-        }, Products.LTC_USD, Intervals._15_S, Intervals._1_M);
+        }, Const.Products.LTC_USD, Const.Intervals._15_S, Const.Intervals._1_M);
 
         //do something
 

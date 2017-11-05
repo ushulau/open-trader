@@ -1,6 +1,6 @@
 package com.gplex.open.trader.service;
 
-import com.gplex.open.trader.constant.Products;
+import com.gplex.open.trader.constant.Const;
 import com.gplex.open.trader.domain.Account;
 import com.gplex.open.trader.domain.Accumulator;
 import com.gplex.open.trader.domain.TimeResponse;
@@ -262,7 +262,7 @@ public class WebSocketTestHarness{
         public void afterConnectionEstablished(WebSocketSession session) throws Exception {
             SubscriptionRequest sr = new SubscriptionRequest();
             List<Channel> channels = new ArrayList<>();
-            channels.add(new TickerChannel(Products.LTC_USD));
+            channels.add(new TickerChannel(Const.Products.LTC_USD));
             sr.setChannels(channels);
             String payload = Utils.MAPPER.writeValueAsString(sr);
             logger.debug("--> {}", payload);

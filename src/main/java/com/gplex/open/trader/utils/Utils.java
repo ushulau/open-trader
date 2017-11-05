@@ -14,6 +14,11 @@ public class Utils {
         return  String.format("%.3f",new Date().getTime()/1000.0);
     }
 
+
+    public static double round(double value){
+        return  Double.valueOf(String.format("%.2f",value));
+    }
+
     public static String intervalString(Long elapsedTime){
         Duration duration = Duration.ofMillis(elapsedTime);
        return duration.toString()

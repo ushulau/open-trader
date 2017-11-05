@@ -1,7 +1,9 @@
 package com.gplex.open.trader.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.gplex.open.trader.domain.*;
+import com.gplex.open.trader.domain.Account;
+import com.gplex.open.trader.domain.AccountActivity;
+import com.gplex.open.trader.domain.Hold;
+import com.gplex.open.trader.domain.TimeResponse;
 import com.gplex.open.trader.rest.BaseSecureClient;
 import com.gplex.open.trader.utils.Security;
 import org.slf4j.Logger;
@@ -19,7 +21,6 @@ import java.util.List;
  * Created by Vlad S. on 9/14/17.
  */
 public class AccountsServiceImpl extends BaseSecureClient{
-    private static final ObjectMapper MAPPER = new ObjectMapper();
     private static final Logger logger = LoggerFactory.getLogger(AccountsServiceImpl.class);
 
     private final String baseUrl;
@@ -30,24 +31,7 @@ public class AccountsServiceImpl extends BaseSecureClient{
         this.baseUrl = baseUrl;
     }
 
-    private void buyOrder(String product, Double price, Double size){
 
-     Order order = new Order(product, "buy", size, price);
-     String orderString = null;
-     try {
-         orderString = MAPPER.writeValueAsString(order);
-     }catch (Exception e){
-         logger.error("",e);
-     }
-
- }
-
-
-
-    private void buyOrder(Double price, Double size ){
-       buyOrder("BTC-USD", price, size);
-
-    }
 
     public TimeResponse getTime(){
         String requestPath = this.baseUrl +"/time";

@@ -1,6 +1,7 @@
 package com.gplex.open.trader.config;
 
 import com.gplex.open.trader.service.AccountsServiceImpl;
+import com.gplex.open.trader.service.OrderServiceImpl;
 import com.gplex.open.trader.utils.Security;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +40,13 @@ public class RootConfig {
     public AccountsServiceImpl accountsService(RestTemplate rt, Security sec) {
         return new AccountsServiceImpl(rt, sec, key, passphrase, baseUrl);
     }
+
+
+    @Bean
+    public OrderServiceImpl orderService(RestTemplate rt, Security sec) {
+        return new OrderServiceImpl(rt, sec, key, passphrase, baseUrl);
+    }
+
 
 }
 

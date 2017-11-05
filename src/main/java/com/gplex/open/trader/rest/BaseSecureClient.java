@@ -1,5 +1,6 @@
 package com.gplex.open.trader.rest;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.gplex.open.trader.utils.Security;
 import com.gplex.open.trader.utils.Utils;
 import org.slf4j.Logger;
@@ -11,6 +12,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
@@ -65,6 +67,43 @@ public class BaseSecureClient {
     }
 
 
+    private <T>HttpEntity<T> createPOSTRequest(String url, T body) throws URISyntaxException {
+        URI uri = new URI(url);
+        String path = uri.getPath();
+
+        MultiValueMap<String, String> parameterMap = new LinkedMultiValueMap<>();
+
+        String ts = Utils.getTs();
+        HttpHeaders headers = createGETHeaders(ts);
+        String bodyValue = null;
+        if(body instanceof  String){
+            bodyValue = (String) body;
+        }else{
+
+            try {
+                bodyValue = Utils.MAPPER.writeValueAsString(body);
+            } catch (JsonProcessingException e) {
+                logger.error("{}", e);
+            }
+        }
+        headers.add("CB-ACCESS-SIGN", sec.signPOST(ts, path, bodyValue));
+        return new HttpEntity<>(body, headers);
+    }
+
+
+    public <T> ResponseEntity<T> executePOST(String requestPath, Object body, Class<T> responseType) {
+        try {
+            return restTemplate.exchange(requestPath, HttpMethod.POST, createPOSTRequest(requestPath, body), responseType);
+
+        } catch (HttpStatusCodeException e) {
+            logger.error("Unable to get response due to [" + e.getResponseBodyAsString() + "]");
+        } catch (Exception ex) {
+            logger.error("Unable to get response due to [" + ex.getMessage() + "]", ex);
+        }
+        return null;
+    }
+
+
     public <T> ResponseEntity<T> executeGET(String requestPath, Class<T> responseType) {
         try {
             return restTemplate.exchange(requestPath, HttpMethod.GET, createGETRequest(requestPath), responseType);
@@ -76,16 +115,15 @@ public class BaseSecureClient {
     }
 
 
-    public <T> ResponseEntity<T> executeGET(String requestPath,  ParameterizedTypeReference<T> responseType) {
+    public <T> ResponseEntity<T> executeGET(String requestPath, ParameterizedTypeReference<T> responseType) {
         try {
-                 return restTemplate.exchange(requestPath, HttpMethod.GET, createGETRequest(requestPath), responseType);
+            return restTemplate.exchange(requestPath, HttpMethod.GET, createGETRequest(requestPath), responseType);
 
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
         return null;
     }
-
 
 
     public <T> ResponseEntity<T> executeNotSignedGET(String requestPath, Class<T> responseType) {

@@ -19,7 +19,7 @@ public class Security {
         this.decodedSecret = Base64.decodeBase64(secret);
     }
 
-    public String sign(String ts, String method, String path, String body)  {
+    public String sign(String ts, String method, String path, String body) {
         try {
 
 
@@ -32,18 +32,18 @@ public class Security {
             String raw = ts + method.toUpperCase() + path + body;
             byte[] rawHmac = mc.doFinal(raw.getBytes());
             return Base64.encodeBase64String(rawHmac);
-        }catch (Exception e){
-            logger.error("",e);
+        } catch (Exception e) {
+            logger.error("", e);
         }
         return null;
     }
 
     public String signGET(String ts, String path) {
-        return  sign(ts, "GET",path, "");
-        }
+        return sign(ts, "GET", path, "");
+    }
 
     public String signPOST(String ts, String path, String body) {
-        return  sign(ts, "POST",path, body);
+        return sign(ts, "POST", path, body);
     }
 
 }

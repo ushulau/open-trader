@@ -1,6 +1,6 @@
 package com.gplex.open.trader.domain.ws;
 
-import com.gplex.open.trader.constant.Channels;
+import com.gplex.open.trader.constant.Const;
 
 import java.util.Arrays;
 
@@ -11,7 +11,7 @@ public class TickerChannel extends  Channel{
 
     public TickerChannel( String ...productIds) {
         super();
-        setName(Channels.TICKER);
+        setName(Const.Channels.TICKER);
         setProductIds(Arrays.asList(productIds));
     }
 
