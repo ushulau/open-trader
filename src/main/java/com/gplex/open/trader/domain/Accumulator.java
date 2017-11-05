@@ -17,12 +17,14 @@ import java.util.Map;
 public class Accumulator {
     private static final Logger logger = LoggerFactory.getLogger(Accumulator.class);
     private final Long period;
+    private final String name;
     private final Map<Long, Candle> map = new HashMap<>();
     private Long lastInterval;
 
 
     public Accumulator(Long period) {
         this.period = period;
+        this.name = Utils.intervalString(period);
     }
 
     public synchronized void add(TickerMessage tm) {
@@ -47,6 +49,10 @@ public class Accumulator {
 
     public Map<Long, Candle> getMap() {
         return map;
+    }
+
+    public String getName() {
+        return name;
     }
 
     @Override
