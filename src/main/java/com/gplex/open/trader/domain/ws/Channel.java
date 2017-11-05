@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -14,6 +15,14 @@ public class Channel {
     private String name;
     @JsonProperty("product_ids")
     private List<String> productIds = null;
+
+    public Channel() {
+    }
+
+    public Channel(String name, String ...productIds) {
+        this.name = name;
+        this.productIds = Arrays.asList(productIds);
+    }
 
     public String getName() {
         return name;

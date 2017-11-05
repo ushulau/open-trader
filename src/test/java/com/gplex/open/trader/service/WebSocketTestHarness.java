@@ -1,8 +1,15 @@
 package com.gplex.open.trader.service;
 
+import com.gplex.open.trader.constant.Products;
 import com.gplex.open.trader.domain.Account;
+import com.gplex.open.trader.domain.Accumulator;
 import com.gplex.open.trader.domain.TimeResponse;
+import com.gplex.open.trader.domain.ws.Channel;
+import com.gplex.open.trader.domain.ws.SubscriptionRequest;
+import com.gplex.open.trader.domain.ws.TickerChannel;
+import com.gplex.open.trader.domain.ws.TickerMessage;
 import com.gplex.open.trader.utils.Security;
+import com.gplex.open.trader.utils.Utils;
 import org.eclipse.jetty.client.HttpClient;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -60,11 +67,17 @@ public class WebSocketTestHarness{
     private String passphrase;
     @Value("${gdax.api.baseUrl}")
     private String baseUrl;
-    private final CountDownLatch latch = new CountDownLatch(1);
+    private static final CountDownLatch latch = new CountDownLatch(5);
     private Security sec;
     private AccountsServiceImpl os;
     public static Mac SHARED_MAC;
-
+    public static Accumulator ac_15s = new Accumulator(15000L);
+    public static Accumulator ac_1m = new Accumulator(60000L);
+    public static Accumulator ac_5m = new Accumulator(5*60000L);
+    public static Accumulator ac_15m = new Accumulator(15*60000L);
+    public static Accumulator ac_1h = new Accumulator(60*60000L);
+    public static List<Accumulator> accumulators = new ArrayList<>();
+    final CountDownLatch disconnectLatch = new CountDownLatch(10);
     static {
         try {
             SHARED_MAC = Mac.getInstance("HmacSHA256");
@@ -86,16 +99,26 @@ public class WebSocketTestHarness{
         logger.debug("{}", new Object[]{accounts});
     }
 
+    private void addAllAccumulators(){
+        accumulators.add(ac_15s);
+        accumulators.add(ac_1m);
+        accumulators.add(ac_5m);
+        accumulators.add(ac_15m);
+        accumulators.add(ac_1h);
 
+    }
     @Test
     public void testWSClient() throws InterruptedException {
+
         final String WS_URI = "wss://ws-feed.gdax.com:443";
         WebSocketHandler handler = new SimpleClientWebSocketHandler();
         WebSocketConnectionManager manager = new WebSocketConnectionManager(new StandardWebSocketClient(), handler, WS_URI);
         manager.setAutoStartup(true);
         manager.start();
         logger.debug(""+manager.isRunning());
-        Thread.sleep(30000L);
+
+        latch.await();
+        logger.debug("numeber of records in accumulator {}", ac_15s.getMap().size());
     }
 
 
@@ -193,10 +216,12 @@ public class WebSocketTestHarness{
                     if (messageCount.incrementAndGet() == expectedMessageCount) {
                         messageLatch.countDown();
                         disconnectLatch.countDown();
+                        latch.countDown();
                         session.disconnect();
                     }
                 }
             }).addReceiptTask(() -> subscribeLatch.countDown());
+
         }
 
         @Override
@@ -231,25 +256,31 @@ public class WebSocketTestHarness{
 
         Logger logger = LoggerFactory.getLogger(SimpleClientWebSocketHandler.class);
 
+
+
         @Override
         public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-            TextMessage message = new TextMessage("{\n" +
-                    "    \"type\": \"subscribe\",\n" +
-                    "    \"product_ids\": [\n" +
-                    "        \"ETH-USD\"\n" +
-                    "    ],\n" +
-                    "    \"channels\": [\n" +
-                    "          \"heartbeat\"\n" +
-                    "        \n" +
-                    "    ]\n" +
-                    "}");
+            SubscriptionRequest sr = new SubscriptionRequest();
+            List<Channel> channels = new ArrayList<>();
+            channels.add(new TickerChannel(Products.LTC_USD));
+            sr.setChannels(channels);
+            String payload = Utils.MAPPER.writeValueAsString(sr);
+            logger.debug("--> {}", payload);
+            TextMessage message = new TextMessage(payload);
             session.sendMessage(message);
         }
 
         @Override
         public void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-            logger.debug("Received: {}" , message.getPayload());
-            //session.close();
+            logger.debug(message.getPayload());
+            try {
+                TickerMessage tm = Utils.MAPPER.readValue(message.getPayload(), TickerMessage.class);
+                for (Accumulator ac : accumulators) {
+                    ac.add(tm);
+                }
+            }catch (Exception e){
+                logger.error("can not parse");
+            }
         }
 
     }

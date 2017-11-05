@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 /**
  * Created by Vlad S. on 11/4/17.
  */
+
 public class TickerMessage {
     @JsonProperty("type")
     private String type;
@@ -42,6 +43,21 @@ public class TickerMessage {
     @JsonProperty("best_ask")
     @JsonSerialize(using = ToStringSerializer.class)
     private BigDecimal bestAsk;
+    @JsonSerialize(using = ToStringSerializer.class)
+    @JsonProperty("open_24h")
+    private BigDecimal open24h;
+    @JsonSerialize(using = ToStringSerializer.class)
+    @JsonProperty("volume_24h")
+    private BigDecimal volume24h;
+    @JsonSerialize(using = ToStringSerializer.class)
+    @JsonProperty("low_24h")
+    private BigDecimal low24h;
+    @JsonSerialize(using = ToStringSerializer.class)
+    @JsonProperty("high_24h")
+    private BigDecimal high24h;
+    @JsonSerialize(using = ToStringSerializer.class)
+    @JsonProperty("volume_30d")
+    private BigDecimal volume30d;
 
     @JsonProperty("type")
     public String getType() {
@@ -140,6 +156,47 @@ public class TickerMessage {
     public void setBestAsk(BigDecimal bestAsk) {
         this.bestAsk = bestAsk;
     }
+
+    public BigDecimal getOpen24h() {
+        return open24h;
+    }
+
+    public void setOpen24h(BigDecimal open24h) {
+        this.open24h = open24h;
+    }
+
+    public BigDecimal getVolume24h() {
+        return volume24h;
+    }
+
+    public void setVolume24h(BigDecimal volume24h) {
+        this.volume24h = volume24h;
+    }
+
+    public BigDecimal getLow24h() {
+        return low24h;
+    }
+
+    public void setLow24h(BigDecimal low24h) {
+        this.low24h = low24h;
+    }
+
+    public BigDecimal getHigh24h() {
+        return high24h;
+    }
+
+    public void setHigh24h(BigDecimal high24h) {
+        this.high24h = high24h;
+    }
+
+    public BigDecimal getVolume30d() {
+        return volume30d;
+    }
+
+    public void setVolume30d(BigDecimal volume30d) {
+        this.volume30d = volume30d;
+    }
+
     @Override
     public String toString() {
         return ReflectionToStringBuilder.toString(this, ToStringStyle.JSON_STYLE);

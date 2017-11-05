@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -44,32 +43,12 @@ public class SerializationTest {
 
     }
 
-@Test
-    public void testDateFormat() throws ParseException {
-
-        SimpleDateFormat  df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSZ");
-        //Date dt = new Date();
-    //logger.debug(df.format(dt));
-       // String vlaue = "2017-09-02T17:05:49.250000Z";
-    //Date date = df.parse(vlaue);
-    //logger.debug("{}", date);
-
-
-    }
-
 
     @Test
     public void testJodaDateFormat() throws ParseException {
-
         DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm.ssSSSS'Z'");
         LocalDateTime now = LocalDateTime.now();
-
         logger.debug(now.format(df));
-        String vlaue = "2017-09-02T17:05:49.250000Z";
-
-        //logger.debug("{}", date);
-
-
     }
 
 
