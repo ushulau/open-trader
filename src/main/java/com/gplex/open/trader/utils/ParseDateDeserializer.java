@@ -29,6 +29,5 @@ public class ParseDateDeserializer extends StdDeserializer<LocalDateTime> {
         }catch (Exception e){
             return LocalDateTime.parse(jsonParser.getValueAsString(), DATE_TIME_FORMATTER_SHORT);
         }
-
     }
 }

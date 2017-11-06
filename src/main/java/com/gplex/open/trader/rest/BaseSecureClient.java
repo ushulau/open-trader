@@ -54,6 +54,18 @@ public class BaseSecureClient {
         return createGETRequest(uri, null);
     }
 
+    private HttpEntity<String> createDELETERequest(String uri) throws URISyntaxException {
+        return createDELETERequest(uri, null);
+    }
+
+    private HttpEntity<String> createDELETERequest(String url, String body) throws URISyntaxException {
+        URI uri = new URI(url);
+        String path = uri.getPath();
+        String ts = Utils.getTs();
+        HttpHeaders headers = createGETHeaders(ts);
+        headers.add("CB-ACCESS-SIGN", sec.sign(ts, "DELETE", path, ""));
+        return new HttpEntity<String>(body, headers);
+    }
     private HttpEntity<MultiValueMap<String, String>> createGETRequest(String url, MultiValueMap<String, String> parameterMap) throws URISyntaxException {
         URI uri = new URI(url);
         String path = uri.getPath();
@@ -124,6 +136,17 @@ public class BaseSecureClient {
         }
         return null;
     }
+
+    public <T> ResponseEntity<T> executeDELETE(String requestPath, Class<T> responseType) {
+        try {
+            return restTemplate.exchange(requestPath, HttpMethod.DELETE, createDELETERequest(requestPath), responseType);
+
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 
 
     public <T> ResponseEntity<T> executeNotSignedGET(String requestPath, Class<T> responseType) {

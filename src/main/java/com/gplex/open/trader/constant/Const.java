@@ -5,6 +5,14 @@ package com.gplex.open.trader.constant;
  */
 public class Const {
 
+
+    public static class OrderStatus {
+        public static final String OPEN = "open";
+        public static final String PENDING = "pending";
+        public static final String ACTIVE = "active";
+
+    }
+
     public static class OrderType {
         public static final String LIMIT = "limit";
         public static final String MARKET = "market";
