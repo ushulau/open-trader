@@ -80,8 +80,6 @@ public class OrderServiceImplTestHarness {
             orderService.cancelOrder(response);
             orderService.cancelOrder(sellResponse);
         }
-
-
     }
 
 

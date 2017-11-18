@@ -32,6 +32,7 @@ public class Const {
     public static class Channels {
         public static final String HEARTBEAT = "heartbeat";
         public static final String TICKER = "ticker";
+        public static final String LEVEL2 = "level2";
     }
 
     /**

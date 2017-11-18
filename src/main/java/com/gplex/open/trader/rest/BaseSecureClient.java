@@ -3,6 +3,7 @@ package com.gplex.open.trader.rest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.gplex.open.trader.utils.Security;
 import com.gplex.open.trader.utils.Utils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
@@ -50,8 +51,13 @@ public class BaseSecureClient {
     }
 
 
-    private HttpEntity<MultiValueMap<String, String>> createGETRequest(String uri) throws URISyntaxException {
-        return createGETRequest(uri, null);
+    private HttpEntity<String> createGETRequest(String url) throws URISyntaxException {
+        URI uri = new URI(url);
+        String path = uri.getPath() + (StringUtils.isNotBlank(uri.getQuery())?"?"+uri.getQuery():"");
+        String ts = Utils.getTs();
+        HttpHeaders headers = createGETHeaders(ts);
+        headers.add("CB-ACCESS-SIGN", sec.signGET(ts, path));
+        return new HttpEntity<>("", headers);
     }
 
     private HttpEntity<String> createDELETERequest(String uri) throws URISyntaxException {
@@ -77,6 +83,8 @@ public class BaseSecureClient {
         headers.add("CB-ACCESS-SIGN", sec.signGET(ts, path));
         return new HttpEntity<>(parameterMap, headers);
     }
+
+
 
 
     private <T>HttpEntity<T> createPOSTRequest(String url, T body) throws URISyntaxException {

@@ -15,10 +15,7 @@ import org.springframework.web.socket.client.WebSocketConnectionManager;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -33,10 +30,11 @@ public class Engine {
     private final String WS_URI = "wss://ws-feed.gdax.com:443";
     private final CountDownLatch latch = new CountDownLatch(1);
     private final Map<String , Accumulator> accumulatorMap = new HashMap<>();
-
+    private final Map<String , Accumulator> unmodifiableMapAccumMap = Collections.unmodifiableMap(accumulatorMap);
     public Engine(TickSubscriber tickSubscriber, String product, Long ... intervals) {
         this.tickSubscriber = tickSubscriber;
         this.product = product;
+        this.instance = this;
         WebSocketHandler handler = new SimpleClientWebSocketHandler();
         WebSocketConnectionManager manager = new WebSocketConnectionManager(new StandardWebSocketClient(), handler, WS_URI);
         manager.setAutoStartup(true);
@@ -56,7 +54,7 @@ public class Engine {
             }
         }).run();
 
-       this.instance = this;
+
     }
 
 
@@ -91,5 +89,10 @@ public class Engine {
             }
         }
 
+    }
+
+
+    public Map<String, Accumulator> getAccumulatorMap() {
+        return unmodifiableMapAccumMap;
     }
 }

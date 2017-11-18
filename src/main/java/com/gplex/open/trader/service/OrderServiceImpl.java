@@ -15,9 +15,11 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import static com.gplex.open.trader.constant.Const.Side.BUY;
 import static com.gplex.open.trader.constant.Const.Side.SELL;
+import static java.util.stream.Collectors.toList;
 
 /**
  * Created by Vlad S. on 9/14/17.
@@ -51,6 +53,18 @@ public class OrderServiceImpl extends BaseSecureClient {
     public List<OrderResponse> listOrders() {
         return listOrders(null, null);
     }
+
+
+    /**
+     * List your current open orders. Only open or un-settled orders are returned. As soon as an order is no longer open and settled, it will no longer appear in the default request.
+     *
+     * @return
+     */
+    public List<OrderResponse> listOrders(Set<String> orderIds) {
+        List<OrderResponse> orders = listOrders(null, null);
+        return orders.stream().filter(order -> orderIds.contains(order.getId())).collect(toList());
+    }
+
 
     public List<OrderResponse> listOrdersByStatus(String ...statuses) {
         return listOrders(null, statuses);

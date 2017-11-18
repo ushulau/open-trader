@@ -8,7 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.ZoneOffset;
-import java.util.HashMap;
+import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -18,7 +19,7 @@ public class Accumulator {
     private static final Logger logger = LoggerFactory.getLogger(Accumulator.class);
     private final Long period;
     private final String name;
-    private final Map<Long, Candle> map = new HashMap<>();
+    private final Map<Long, Candle> map = new LinkedHashMap<>();
     private Long lastInterval;
 
 
@@ -45,6 +46,21 @@ public class Accumulator {
             Candle candle = map.get(startPeriod);
             candle.add(tm);
         }
+    }
+
+    public Candle getCurrent() {
+        return getPrevious(0L);
+    }
+
+    public Candle getPrevious() {
+        return getPrevious(1L);
+    }
+
+    public Candle getPrevious(long shift){
+        long l = new Date().getTime();
+        long index = l / period;
+        long currentPeriod = (index - shift)* period;
+        return map.get(currentPeriod);
     }
 
     public Map<Long, Candle> getMap() {

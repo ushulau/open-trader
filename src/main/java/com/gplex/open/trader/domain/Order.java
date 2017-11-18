@@ -1,6 +1,7 @@
 package com.gplex.open.trader.domain;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.gplex.open.trader.constant.Const;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -13,6 +14,7 @@ public class Order {
     private String side;
     @JsonProperty("product_id")
     private String productId;
+    private String type;
 
     public Order() {
     }
@@ -22,6 +24,7 @@ public class Order {
         this.size = size.toString();
         this.side = side;
         this.productId = productId;
+        this.type = Const.OrderType.LIMIT;
     }
 
     public Order(String productId, String side, String price, String size) {
@@ -29,6 +32,7 @@ public class Order {
         this.size = size;
         this.side = side;
         this.productId = productId;
+        this.type = Const.OrderType.LIMIT;
     }
 
     public String getPrice() {
@@ -61,6 +65,14 @@ public class Order {
 
     public void setProductId(String productId) {
         this.productId = productId;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     @Override

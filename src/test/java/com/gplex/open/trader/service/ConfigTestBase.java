@@ -46,4 +46,9 @@ public class ConfigTestBase {
     public OrderServiceImpl orderService(RestTemplate rt, Security sec) {
         return new OrderServiceImpl(rt, sec, key, passphrase, baseUrl);
     }
+
+    @Bean
+    public FillsServiceImpl fillsService(RestTemplate rt, Security sec) {
+        return new FillsServiceImpl(rt, sec, key, passphrase, baseUrl);
+    }
 }
