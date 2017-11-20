@@ -2,11 +2,12 @@ package com.gplex.open.trader.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.gplex.open.trader.constant.Const;
-import com.gplex.open.trader.domain.Accumulator;
 import com.gplex.open.trader.domain.OrderBook;
+import com.gplex.open.trader.domain.Pressure;
 import com.gplex.open.trader.domain.ws.*;
 import com.gplex.open.trader.utils.Security;
 import com.gplex.open.trader.utils.Utils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.java_websocket.WebSocket;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft;
@@ -31,8 +32,12 @@ import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Vlad S. on 9/15/17.
@@ -54,14 +59,11 @@ public class Level2WSTestHarness {
     private static final CountDownLatch latch = new CountDownLatch(5);
     private Security sec;
     private AccountsServiceImpl os;
+    private double buyPressure = 0.0;
+    private double sellPressure = 0.0;
     public static Mac SHARED_MAC;
-    public static Accumulator ac_15s = new Accumulator(15000L);
-    public static Accumulator ac_1m = new Accumulator(60000L);
-    public static Accumulator ac_5m = new Accumulator(5*60000L);
-    public static Accumulator ac_15m = new Accumulator(15*60000L);
-    public static Accumulator ac_1h = new Accumulator(60*60000L);
-    public static List<Accumulator> accumulators = new ArrayList<>();
-    private static final OrderBook orderBook = new OrderBook();
+    private OrderBook orderBook = null;
+
     static {
         try {
             SHARED_MAC = Mac.getInstance("HmacSHA256");
@@ -91,28 +93,57 @@ public class Level2WSTestHarness {
         t.start();
         //t2.start();
 
-        /*new Thread(() -> {
-             manager.start();
+        ScheduledExecutorService exec = Executors.newSingleThreadScheduledExecutor();
+        // do stuff
+
+        exec.scheduleAtFixedRate(() -> {
+/*
+
+            int mid = orderBook.getCurrentMiddlePoint();
+            List<OrderBookRecord> lst = orderBook.getList();
+            for(int i = mid-1; i>=0 && i>= mid - 10; i--){
+                logger.debug("{}",lst.get(i));
+            }
+            logger.debug("mid --> {}",lst.get(mid));
+            for(int i = mid+1; i< orderBook.getList().size() && i<= mid + 10; i++){
+                logger.debug("{}",lst.get(i));
+            }
+
+*/
+
+
+            Pressure pressure = orderBook.getPressure();
+            List<Pair<Double, Double>> force = pressure.getForce();
+
+            for(int i = 0; i< 20; i ++){
+                logger.debug("{}", force.get(i));
+
+            }
+
+
+
+
+
+        }, new Date().getTime() % 60000, 30000, TimeUnit.MILLISECONDS);
+        /*
+        new Thread(() -> {
+
             logger.debug("" + manager.isRunning());
             try {
                 //latch.await();
             } catch (Exception e) {
                 logger.error("{}", e);
             }
-        }).run();
+            this
+        }).run();*/
 
-*/
 
 
-       // });
+        // });
         //t2.ter
         latch.await();
 //        logger.debug("numeber of records in accumulator {}", ac_15s.getMap().size());
     }
-
-
-
-
 
 
     public class Level2ChannelClient extends WebSocketClient {
@@ -123,77 +154,46 @@ public class Level2WSTestHarness {
             super(serverUri, protocolDraft);
         }
 
-
-      /*  @Override
-        public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-            SubscriptionRequest sr = new SubscriptionRequest();
-            List<Channel> channels = new ArrayList<>();
-            channels.add(new Level2Channel(Const.Products.LTC_USD));
-            sr.setChannels(channels);
-            String payload = Utils.MAPPER.writeValueAsString(sr);
-            logger.debug("--> {}", payload);
-            TextMessage message = new TextMessage(payload);
-            try {
-                session.sendMessage(message);
-            }catch (Exception e){
-                logger.error("error sending message {}", e);
-            }
-        }*/
-
-/*
         @Override
-        public void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-            //logger.debug(message.getPayload());
-            try {
-                TickerMessage tm = Utils.MAPPER.readValue(message.getPayload(), TickerMessage.class);
-                for (Accumulator ac : accumulators) {
-                    ac.add(tm);
-                }
-            }catch (Exception e){
-                logger.error("can not parse -> {}", message.getPayload());
-            }
-        }*/
-
-
-
-        @Override
-        public void onMessage( String message ) {
-            if(orderBook == null) {
+        public void onMessage(String message) {
+            if (orderBook == null) {
                 try {
                     Level2SnapshotResponse snapshot = Utils.MAPPER.readValue(message, Level2SnapshotResponse.class);
                     initSnapshot(snapshot);
-                    return;
                 } catch (Exception e) {
                     logger.error("{}", e);
                 }
-            }else{
+            } else {
                 try {
                     Level2UpdateResponse updateMessage = Utils.MAPPER.readValue(message, Level2UpdateResponse.class);
-                    orderBook.update(updateMessage);
-                    return;
+                    orderBook.add(updateMessage);
                 } catch (Exception e) {
                     logger.error("{}", e);
                 }
+                Pressure pressure = orderBook.getPressure(20);
+                double buy = new Double(String.format("%.2f",pressure.getBuy()));
+                double sell = new Double(String.format("%.2f",pressure.getSell()));
+                if(buy != buyPressure || sell != sellPressure ) {
+                  //  logger.debug("buy [{}]  --- sell [{}]  : {}", buy, sell, pressure.getDiff());
+                    buyPressure = buy;
+                    sellPressure = sell;
+                }
             }
-
-
-
-            send( message );
         }
 
         @Override
-        public void onMessage( ByteBuffer blob ) {
-            getConnection().send( blob );
+        public void onMessage(ByteBuffer blob) {
+            getConnection().send(blob);
         }
 
         @Override
-        public void onError( Exception ex ) {
-            System.out.println( "Error: " );
+        public void onError(Exception ex) {
+            System.out.println("Error: ");
             ex.printStackTrace();
         }
 
         @Override
-        public void onOpen( ServerHandshake handshake ) {
+        public void onOpen(ServerHandshake handshake) {
             SubscriptionRequest sr = new SubscriptionRequest();
             List<Channel> channels = new ArrayList<>();
             channels.add(new Level2Channel(Const.Products.LTC_USD));
@@ -211,23 +211,23 @@ public class Level2WSTestHarness {
         }
 
         @Override
-        public void onClose( int code, String reason, boolean remote ) {
-            System.out.println( "Closed: " + code + " " + reason );
+        public void onClose(int code, String reason, boolean remote) {
+            System.out.println("Closed: " + code + " " + reason);
         }
 
         @Override
-        public void onWebsocketMessageFragment(WebSocket conn, Framedata frame ) {
+        public void onWebsocketMessageFragment(WebSocket conn, Framedata frame) {
             FramedataImpl1 builder = (FramedataImpl1) frame;
-            builder.setTransferemasked( true );
-            getConnection().sendFrame( frame );
+            builder.setTransferemasked(true);
+            getConnection().sendFrame(frame);
         }
-
 
 
     }
 
     private void initSnapshot(Level2SnapshotResponse snapshot) {
-
+        orderBook = new OrderBook();
+        orderBook.add(snapshot);
     }
 
 }

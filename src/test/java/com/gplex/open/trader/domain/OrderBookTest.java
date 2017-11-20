@@ -1,5 +1,6 @@
 package com.gplex.open.trader.domain;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -128,6 +129,59 @@ public class OrderBookTest {
     }
 
 
+    @Test
+    public void testGettingMiddlePoint(){
+        OrderBook ob = getOrderBook();
+
+        int mid = ob.getCurrentMiddlePoint();
+        logger.debug("current mid point => {} ", ob.list.get(mid));
+        for(OrderBookRecord record: ob.list){
+            logger.debug("{}", record);
+
+        }
+
+    }
+
+    @Test
+    public void testGettingMiddlePointAllSell(){
+        OrderBook ob = getSellOnlyOrderBook();
+
+        int mid = ob.getCurrentMiddlePoint();
+        logger.debug("current mid point => {} ", ob.list.get(mid));
+        for(OrderBookRecord record: ob.list){
+            logger.debug("{}", record);
+
+        }
+
+    }
+
+
+
+    @Test
+    public void testPressure(){
+        OrderBook ob = getOrderBook();
+        Pressure pressure = ob.getPressure();
+        List<Pair<Double, Double>> force = pressure.getForce();
+
+        for(Pair<Double, Double> pair: force){
+            logger.debug("{}", pair);
+
+        }
+
+    }
+
+    @Test(expected = IndexOutOfBoundsException.class)
+    public void testGettingMiddlePointAllBuy(){
+        OrderBook ob = getBuyOnlyOrderBook();
+
+        for(OrderBookRecord record: ob.list){
+            logger.debug("{}", record);
+        }
+        int mid = ob.getCurrentMiddlePoint();
+        logger.debug("current mid point => {} ", ob.list.get(mid));
+    }
+
+
     private OrderBook getOrderBook() {
         OrderBook ob = new OrderBook();
         List<OrderBookRecord> list = new ArrayList<>();
@@ -153,5 +207,26 @@ public class OrderBookTest {
         return ob;
     }
 
+
+    private OrderBook getSellOnlyOrderBook() {
+        OrderBook ob = new OrderBook();
+        List<OrderBookRecord> list = new ArrayList<>();
+        for(int i = 0; i < 20; i++){
+            list.add(new OrderBookRecord("sell", String.format("%.2f",  Math.random()* 10.0) ,String.format("%.2f",  Math.random()* 1000.0)));
+        }
+        ob.addAll(list);
+        return ob;
+    }
+
+
+    private OrderBook getBuyOnlyOrderBook() {
+        OrderBook ob = new OrderBook();
+        List<OrderBookRecord> list = new ArrayList<>();
+        for(int i = 0; i < 20; i++){
+            list.add(new OrderBookRecord("buy", String.format("%.2f",  Math.random()* 10.0) ,String.format("%.2f",  Math.random()* 1000.0)));
+        }
+        ob.addAll(list);
+        return ob;
+    }
 
 }
