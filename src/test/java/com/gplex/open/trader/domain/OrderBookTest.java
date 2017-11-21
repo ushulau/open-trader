@@ -159,8 +159,26 @@ public class OrderBookTest {
 
     @Test
     public void testPressure(){
+        OrderBook ob = getOrderBookBuyHasMorePressure();
+        Pressure pressure = ob.getPressure();
+        ob.getList().stream().forEach(o -> logger.debug("{}", o));
+
+        List<Pair<Double, Double>> force = pressure.getForce();
+
+        for(Pair<Double, Double> pair: force){
+            logger.debug("{}", pair);
+
+        }
+
+    }
+
+
+    @Test
+    public void testPressure2(){
         OrderBook ob = getOrderBook();
         Pressure pressure = ob.getPressure();
+        ob.getList().stream().forEach(o -> logger.debug("{}", o));
+
         List<Pair<Double, Double>> force = pressure.getForce();
 
         for(Pair<Double, Double> pair: force){
@@ -203,6 +221,22 @@ public class OrderBookTest {
         list.add(new OrderBookRecord("sell", "2.45","1.32"));
         list.add(new OrderBookRecord("buy", "1.40","1.32"));
         list.add(new OrderBookRecord("delete", "45.05","0"));
+        ob.addAll(list);
+        return ob;
+    }
+
+
+    private OrderBook getOrderBookBuyHasMorePressure() {
+        OrderBook ob = new OrderBook();
+        List<OrderBookRecord> list = new ArrayList<>();
+
+        list.add(new OrderBookRecord("buy", "1.0","1"));
+        list.add(new OrderBookRecord("buy", "1.1","1"));
+        list.add(new OrderBookRecord("buy", "1.2","1"));
+
+        list.add(new OrderBookRecord("sell", "1.3","1"));
+        list.add(new OrderBookRecord("sell", "1.4","1"));
+        list.add(new OrderBookRecord("sell", "1.5","1"));
         ob.addAll(list);
         return ob;
     }

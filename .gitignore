@@ -2,3 +2,6 @@
 .gitignore
 
 open-trader.log
+.DS_Store
+.idea
+target

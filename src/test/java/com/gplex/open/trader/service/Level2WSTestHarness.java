@@ -114,7 +114,7 @@ public class Level2WSTestHarness {
 
             Pressure pressure = orderBook.getPressure();
             List<Pair<Double, Double>> force = pressure.getForce();
-
+            logger.debug("--------------");
             for(int i = 0; i< 20; i ++){
                 logger.debug("{}", force.get(i));
 

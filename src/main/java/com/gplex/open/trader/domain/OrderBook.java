@@ -31,7 +31,7 @@ public class OrderBook {
                 delete = true;
             }
             if (list.size() == 0 || i >= list.size()) {
-                if(!delete) {
+                if (!delete) {
                     list.add(record);
                 }
             } else if ((double) list.get(i).getPrice() == record.getPrice()) {
@@ -49,7 +49,7 @@ public class OrderBook {
     //TODO: Verification of product in response
     public void add(Level2UpdateResponse update) {
         List<List<String>> changes = update.getChanges();
-        for(List<String> change: changes){
+        for (List<String> change : changes) {
             OrderBookRecord record = new OrderBookRecord(change.get(0), change.get(1), change.get(2));
             add(record);
         }
@@ -77,86 +77,79 @@ public class OrderBook {
     }
 
 
-    public Pressure getPressure(){
+    public Pressure getPressure() {
         int mid = getCurrentMiddlePoint();
         double buy = 0.0;
         double sell = 0.0;
-        List<Double> buySum = new ArrayList<>();
         List<Integer> buyIndex = new ArrayList<>();
-        List<Double> sellSum = new ArrayList<>();
         List<Integer> sellIndex = new ArrayList<>();
 
         List<Double> diff = new ArrayList<>();
         int lowerLimit = Math.max(0, mid - 101);
         int upperLimit = Math.min(list.size(), mid + 101);
 
-        for(int i = mid-1; i>=lowerLimit; i--){
+        for (int i = mid - 1; i >= lowerLimit; i--) {
             buy += list.get(i).getSize();
-            buySum.add(buy);
             buyIndex.add(i);
         }
 
-        for(int i = mid; i< upperLimit; i++){
+        for (int i = mid; i < upperLimit; i++) {
             sell += list.get(i).getSize();
-            sellSum.add(sell);
             sellIndex.add(i);
         }
 
-
         int iSell = 0;
         int iBuy = 0;
-        double sum;
         List<Pair<Double, Double>> force = new ArrayList<>();
-
         OrderBookRecord b = list.get(buyIndex.get(iBuy));
         OrderBookRecord s = list.get(sellIndex.get(iSell));
-        sum = b.getSize() - s.getSize();
+        double sum = b.getSize() - s.getSize();
+        force.add(new ImmutablePair<>(b.getPrice(), s.getPrice()));
 
-        while(iBuy < buyIndex.size()-1 && iSell < sellIndex.size()-1){
+        while (iBuy < buyIndex.size() - 1 && iSell < sellIndex.size() - 1) {
             if (sum > 0) {
                 iSell++;
-                sum -= list.get(sellIndex.get(iSell)).getSize();
+                sum -= s.getSize();
             } else if (sum < 0) {
-                iBuy ++;
-                sum += list.get(buyIndex.get(iBuy)).getSize();
+                iBuy++;
+                sum += b.getSize();
             } else {
                 iSell++;
                 iBuy++;
-                sum = list.get(buyIndex.get(iBuy)).getSize() - list.get(sellIndex.get(iSell)).getSize();
+                sum = b.getSize() - s.getSize();
             }
-
-            force.add(new ImmutablePair<>(list.get(buyIndex.get(iBuy)).getPrice(),list.get(sellIndex.get(iSell)).getPrice()));
+            b = list.get(buyIndex.get(iBuy));
+            s = list.get(sellIndex.get(iSell));
+            force.add(new ImmutablePair<>(b.getPrice(), s.getPrice()));
         }
 
-
-        return new Pressure(buy,sell, diff, force);
+        return new Pressure(buy, sell, diff, force);
 
     }
 
 
-
-    public Pressure getPressure(int n){
+    public Pressure getPressure(int n) {
         int mid = getCurrentMiddlePoint();
         double buy = 0.0;
         double sell = 0.0;
         List<Double> buySum = new ArrayList<>();
         List<Double> sellSum = new ArrayList<>();
         List<Double> diff = new ArrayList<>();
-        for(int i = mid-1; i>=0 && i>= mid - n -1; i--){
-             buy += list.get(i).getSize();
-             buySum.add(buy);
+        for (int i = mid - 1; i >= 0 && i >= mid - n - 1; i--) {
+            buy += list.get(i).getSize();
+            buySum.add(buy);
         }
 
-        for(int i = mid; i< list.size() && i<= mid + n; i++){
+        for (int i = mid; i < list.size() && i <= mid + n; i++) {
             sell += list.get(i).getSize();
             sellSum.add(sell);
         }
-        for(int i = 0; i < sellSum.size(); i ++ ){
-            diff.add(buySum.get(i)- sellSum.get(i));
+        for (int i = 0; i < sellSum.size(); i++) {
+            diff.add(buySum.get(i) - sellSum.get(i));
         }
 
 
-        return new Pressure(buy,sell, diff);
+        return new Pressure(buy, sell, diff);
 
     }
 
@@ -185,11 +178,11 @@ public class OrderBook {
     public void add(Level2SnapshotResponse snapshot) {
         List<List<String>> sells = snapshot.getAsks();
         List<List<String>> buys = snapshot.getBids();
-        for(List<String> sell: sells){
+        for (List<String> sell : sells) {
             OrderBookRecord record = new OrderBookRecord("sell", sell.get(0), sell.get(1));
             add(record);
         }
-        for(List<String> buy: buys){
+        for (List<String> buy : buys) {
             OrderBookRecord record = new OrderBookRecord("buy", buy.get(0), buy.get(1));
             add(record);
         }
