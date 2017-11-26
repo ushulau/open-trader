@@ -12,6 +12,8 @@
 
     <properties>
         <java.version>1.8</java.version>
+        <maven.build.timestamp.format>yyyy-MM-dd-HH-mm</maven.build.timestamp.format>
+
     </properties>
 
     <parent>
@@ -85,6 +87,11 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>com.gplex.open.trader.Application</mainClass>
+                    <!--<finalName>open-trader-${maven.build.timestamp}</finalName>-->
+                    <finalName>open-trader</finalName>
+                </configuration>
             </plugin>
         </plugins>
     </build>

@@ -1,10 +1,7 @@
 package com.gplex.open.trader.strategy;
 
 import com.gplex.open.trader.constant.Const;
-import com.gplex.open.trader.domain.Accumulator;
-import com.gplex.open.trader.domain.Candle;
-import com.gplex.open.trader.domain.FillResponse;
-import com.gplex.open.trader.domain.OrderResponse;
+import com.gplex.open.trader.domain.*;
 import com.gplex.open.trader.domain.ws.TickerMessage;
 import com.gplex.open.trader.engine.Engine;
 import com.gplex.open.trader.engine.TickSubscriber;
@@ -154,6 +151,11 @@ public class SimpleStrategy implements TickSubscriber {
             }*/
 
 
+    }
+
+    @Override
+    public void onUpdate(OrderBook ob) {
+        throw new RuntimeException("Not implemented");
     }
 
     private void initOpenOrders() {

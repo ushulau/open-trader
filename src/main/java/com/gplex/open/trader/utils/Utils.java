@@ -3,6 +3,8 @@ package com.gplex.open.trader.utils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Date;
 
 /**
@@ -25,6 +27,11 @@ public class Utils {
                .substring(2)
                .replaceAll("(\\d[HMS])(?!$)", "$1 ")
                .toLowerCase();
+    }
+
+
+    public static Date convert(LocalDateTime dt){
+         return Date.from(dt.toInstant(ZoneOffset.UTC));
     }
 
 }

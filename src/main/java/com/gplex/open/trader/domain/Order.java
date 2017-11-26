@@ -2,6 +2,7 @@ package com.gplex.open.trader.domain;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.gplex.open.trader.constant.Const;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -15,6 +16,9 @@ public class Order {
     @JsonProperty("product_id")
     private String productId;
     private String type;
+    @JsonProperty("post_only")
+    private Boolean postOnly;
+
 
     public Order() {
     }
@@ -25,6 +29,7 @@ public class Order {
         this.side = side;
         this.productId = productId;
         this.type = Const.OrderType.LIMIT;
+        this.postOnly = true;
     }
 
     public Order(String productId, String side, String price, String size) {
@@ -33,6 +38,7 @@ public class Order {
         this.side = side;
         this.productId = productId;
         this.type = Const.OrderType.LIMIT;
+        this.postOnly = true;
     }
 
     public String getPrice() {
@@ -73,6 +79,22 @@ public class Order {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public boolean isBuy(){
+        return StringUtils.isNotBlank(this.getSide()) && "buy".equalsIgnoreCase(this.getSide());
+    }
+
+    public boolean isSell(){
+        return StringUtils.isNotBlank(this.getSide()) && "sell".equalsIgnoreCase(this.getSide());
+    }
+
+    public Boolean isPostOnly() {
+        return postOnly;
+    }
+
+    public void setPostOnly(Boolean postOnly) {
+        this.postOnly = postOnly;
     }
 
     @Override

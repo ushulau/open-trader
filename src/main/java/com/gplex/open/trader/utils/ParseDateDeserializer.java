@@ -14,6 +14,7 @@ import java.time.format.DateTimeFormatter;
  */
 public class ParseDateDeserializer extends StdDeserializer<LocalDateTime> {
 
+    public static final DateTimeFormatter DATE_TIME_FORMATTER_NO_MILLIS = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
     public static final DateTimeFormatter DATE_TIME_FORMATTER_SHORTEST = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SS'Z'");
     public static final DateTimeFormatter DATE_TIME_FORMATTER_SHORT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSS'Z'");
     public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'");
@@ -32,7 +33,11 @@ public class ParseDateDeserializer extends StdDeserializer<LocalDateTime> {
             try {
                 return LocalDateTime.parse(jsonParser.getValueAsString(), DATE_TIME_FORMATTER_SHORT);
             } catch (Exception e1) {
-                return LocalDateTime.parse(jsonParser.getValueAsString(), DATE_TIME_FORMATTER_SHORTEST);
+                try {
+                    return LocalDateTime.parse(jsonParser.getValueAsString(), DATE_TIME_FORMATTER_SHORTEST);
+                } catch (Exception e2) {
+                    return LocalDateTime.parse(jsonParser.getValueAsString(), DATE_TIME_FORMATTER_NO_MILLIS);
+                }
             }
         }
     }

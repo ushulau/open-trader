@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.gplex.open.trader.utils.ParseDateDeserializer;
 import com.gplex.open.trader.utils.ParseDateSerializer;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -174,6 +175,15 @@ public class OrderResponse {
     public void setSettled(Boolean settled) {
         this.settled = settled;
     }
+
+    public boolean isBuy(){
+        return StringUtils.isNotBlank(this.getSide()) && "buy".equalsIgnoreCase(this.getSide());
+    }
+
+    public boolean isSell(){
+        return StringUtils.isNotBlank(this.getSide()) && "sell".equalsIgnoreCase(this.getSide());
+    }
+
 
     @Override
     public String toString() {

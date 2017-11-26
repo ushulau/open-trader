@@ -1,5 +1,6 @@
 package com.gplex.open.trader.domain;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -45,6 +46,14 @@ public class OrderBookRecord {
 
     public void setSize(Double size) {
         this.size = size;
+    }
+
+    public boolean isBuy(){
+        return StringUtils.isNotBlank(this.getSide()) && "buy".equalsIgnoreCase(this.getSide());
+    }
+
+    public boolean isSell(){
+        return StringUtils.isNotBlank(this.getSide()) && "sell".equalsIgnoreCase(this.getSide());
     }
 
     @Override

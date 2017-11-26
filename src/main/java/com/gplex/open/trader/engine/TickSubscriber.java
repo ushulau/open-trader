@@ -1,5 +1,6 @@
 package com.gplex.open.trader.engine;
 
+import com.gplex.open.trader.domain.OrderBook;
 import com.gplex.open.trader.domain.ws.TickerMessage;
 
 /**
@@ -8,5 +9,6 @@ import com.gplex.open.trader.domain.ws.TickerMessage;
 public interface TickSubscriber {
 
     void onTick(Engine engine, TickerMessage tickerMessage);
+    void onUpdate(OrderBook ob);
 
 }

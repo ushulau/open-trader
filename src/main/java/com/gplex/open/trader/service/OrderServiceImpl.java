@@ -105,12 +105,16 @@ public class OrderServiceImpl extends BaseSecureClient {
 
 
     public boolean cancelOrder(OrderResponse order) {
+        return !(order == null || StringUtils.isBlank(order.getId())) && cancelOrder(order.getId());
+    }
+
+    public boolean cancelOrder(String id) {
         String requestPath = this.baseUrl + "/orders";
-        if(order == null || StringUtils.isBlank(order.getId())){
+        if(StringUtils.isBlank(id)){
             return false;
         }
-        requestPath += "/" + order.getId();
-        logger.debug("canceling order ... [{}]", order.getId());
+        requestPath += "/" + id;
+        logger.debug("canceling order ... [{}]", id);
         try {
             ResponseEntity<String> result = executeDELETE(requestPath, String.class);
             logger.debug("{}", result.getBody());
@@ -148,8 +152,11 @@ public class OrderServiceImpl extends BaseSecureClient {
         String requestPath = this.baseUrl + "/orders";
         try {
             ResponseEntity<OrderResponse> result = executePOST(requestPath, order, OrderResponse.class);
-            logger.info("{}", result.getBody());
-            return result.getBody();
+            if(result != null && result.getStatusCode().is2xxSuccessful()){
+                logger.info("{}", result.getBody());
+            }
+
+            return result != null ?result.getBody(): null;
         } catch (Exception e) {
             logger.error("", e);
         }

@@ -15,7 +15,10 @@ import java.util.List;
  */
 public class OrderBook {
     final List<OrderBookRecord> list = Collections.synchronizedList(new ArrayList<>());
-
+    private  double buyVolume = 0.0;
+    private  double sellVolume = 0.0;
+    private  double buyVolume100 = 0.0;
+    private  double sellVolume100 = 0.0;
 
     synchronized public void addAll(List<OrderBookRecord> lst) {
         for (OrderBookRecord record : lst) {
@@ -85,19 +88,28 @@ public class OrderBook {
         List<Integer> sellIndex = new ArrayList<>();
 
         List<Double> diff = new ArrayList<>();
-        int lowerLimit = Math.max(0, mid - 101);
-        int upperLimit = Math.min(list.size(), mid + 101);
-
+        int lowerLimit = Math.max(0, mid - 201);
+        int upperLimit = Math.min(list.size(), mid + 201);
+        int counter = 0;
         for (int i = mid - 1; i >= lowerLimit; i--) {
             buy += list.get(i).getSize();
             buyIndex.add(i);
+            if(counter < 100){
+                buyVolume100 = buy;
+            }
+            counter ++;
         }
-
+        counter = 0;
         for (int i = mid; i < upperLimit; i++) {
             sell += list.get(i).getSize();
             sellIndex.add(i);
+            if(counter < 100){
+              sellVolume100 = sell;
+            }
+            counter ++;
         }
-
+        buyVolume = buy;
+        sellVolume = sell;
         int iSell = 0;
         int iBuy = 0;
         List<Pair<Double, Double>> force = new ArrayList<>();
@@ -105,7 +117,8 @@ public class OrderBook {
         OrderBookRecord s = list.get(sellIndex.get(iSell));
         double sum = b.getSize() - s.getSize();
         force.add(new ImmutablePair<>(b.getPrice(), s.getPrice()));
-
+        buy = b.getPrice();
+        sell = s.getPrice();
         while (iBuy < buyIndex.size() - 1 && iSell < sellIndex.size() - 1) {
             if (sum > 0) {
                 iSell++;
@@ -190,5 +203,21 @@ public class OrderBook {
 
     public List<OrderBookRecord> getList() {
         return list;
+    }
+
+    public double getBuyVolume() {
+        return buyVolume;
+    }
+
+    public double getBuyVolume100() {
+        return buyVolume100;
+    }
+
+    public double getSellVolume100() {
+        return sellVolume100;
+    }
+
+    public double getSellVolume() {
+        return sellVolume;
     }
 }
