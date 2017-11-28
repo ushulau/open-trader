@@ -88,9 +88,10 @@ public class Level2Engine {
                             "\n+----------------------------------------+\n" +
                                     "|" + Utils.padSpace("HEARTBEAT: [" + c + "]", 40) + "|\n" +
                                     "|" + Utils.padSpace("Current price -> $" + orderBook.getList().get(orderBook.getCurrentMiddlePoint()).getPrice(), 40) + "|\n" +
-                                    "|" + Utils.padSpace("$0.5 range buy pressure -> " + orderBook.getVolume(50) + "%", 40) + "|\n" +
-                                    "|" + Utils.padSpace("$1.0 range buy pressure -> " + orderBook.getVolume(100) + "%", 40) + "|\n" +
-                                    "|" + Utils.padSpace("$2.0 range buy pressure -> " + orderBook.getVolume(200) + "%", 40) + "|\n" +
+                                    "|" + Utils.padSpace("$0.25 range buy pressure -> " + orderBook.getVolume(25) + "%", 40) + "|\n" +
+                                    "|" + Utils.padSpace("$0.50 range buy pressure -> " + orderBook.getVolume(50) + "%", 40) + "|\n" +
+                                    "|" + Utils.padSpace("$1.00 range buy pressure -> " + orderBook.getVolume(100) + "%", 40) + "|\n" +
+                                    "|" + Utils.padSpace("$2.00 range buy pressure -> " + orderBook.getVolume(200) + "%", 40) + "|\n" +
                                     "+----------------------------------------+");
                 }catch (Exception e){
                     logger.error("Heartbeat error [{}]", e);
