@@ -184,7 +184,6 @@ public class OrderResponse {
         return StringUtils.isNotBlank(this.getSide()) && "sell".equalsIgnoreCase(this.getSide());
     }
 
-
     @Override
     public String toString() {
         return ReflectionToStringBuilder.toString(this, ToStringStyle.JSON_STYLE);

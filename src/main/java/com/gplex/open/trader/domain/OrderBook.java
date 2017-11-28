@@ -10,15 +10,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static com.gplex.open.trader.utils.Utils.round;
+
 /**
  * Created by Vlad S. on 11/15/17.
  */
 public class OrderBook {
     final List<OrderBookRecord> list = Collections.synchronizedList(new ArrayList<>());
-    private  double buyVolume = 0.0;
-    private  double sellVolume = 0.0;
-    private  double buyVolume100 = 0.0;
-    private  double sellVolume100 = 0.0;
+
+    private Pair<Double, Double>[] volumeArray = new Pair[200];
 
     synchronized public void addAll(List<OrderBookRecord> lst) {
         for (OrderBookRecord record : lst) {
@@ -79,37 +79,42 @@ public class OrderBook {
         return low;
     }
 
-
+    /**
+     * Calculates pressure and sell and buy volumes for +-1.0 and +-2.0 from current market price
+     *
+     * @return
+     */
     public Pressure getPressure() {
         int mid = getCurrentMiddlePoint();
         double buy = 0.0;
         double sell = 0.0;
         List<Integer> buyIndex = new ArrayList<>();
         List<Integer> sellIndex = new ArrayList<>();
+        List<Pair<Double, Double>> buyPriceVolume = new ArrayList<>();
+        List<Pair<Double, Double>> sellPriceVolume = new ArrayList<>();
 
         List<Double> diff = new ArrayList<>();
         int lowerLimit = Math.max(0, mid - 201);
         int upperLimit = Math.min(list.size(), mid + 201);
-        int counter = 0;
+        double buyPrice = list.get(Math.max(0, mid - 1)).getPrice();
+        double sellPrice = list.get(Math.max(0, mid)).getPrice();
+
         for (int i = mid - 1; i >= lowerLimit; i--) {
-            buy += list.get(i).getSize();
+            OrderBookRecord obr = list.get(i);
+            buy += obr.getSize();
             buyIndex.add(i);
-            if(counter < 100){
-                buyVolume100 = buy;
-            }
-            counter ++;
+            buyPriceVolume.add(new ImmutablePair<>(obr.getPrice(),buy));
         }
-        counter = 0;
+
         for (int i = mid; i < upperLimit; i++) {
-            sell += list.get(i).getSize();
+            OrderBookRecord obr = list.get(i);
+            sell += obr.getSize();
             sellIndex.add(i);
-            if(counter < 100){
-              sellVolume100 = sell;
-            }
-            counter ++;
+            sellPriceVolume.add(new ImmutablePair<>(obr.getPrice(),sell));
         }
-        buyVolume = buy;
-        sellVolume = sell;
+
+        updateVolume(buyPriceVolume, sellPriceVolume);
+
         int iSell = 0;
         int iBuy = 0;
         List<Pair<Double, Double>> force = new ArrayList<>();
@@ -138,6 +143,31 @@ public class OrderBook {
 
         return new Pressure(buy, sell, diff, force);
 
+    }
+
+    private void updateVolume(List<Pair<Double, Double>> buyPriceVolume, List<Pair<Double, Double>> sellPriceVolume) {
+        Pair[] volumeArray = new Pair[200];
+        int aBuy = 0;
+        int aSell = 0;
+        double startBuyPrice = buyPriceVolume.get(0).getLeft();
+        double startSellPrice = sellPriceVolume.get(0).getLeft();
+        double buyVolume = 0.0;
+        double sellVolume = 0.0;
+        for(int i = 0; i < 200; i++){
+            double buyPrice = startBuyPrice + i * 0.01;
+            double sellPrice = startSellPrice + i * 0.01;
+            if(buyPriceVolume.size() > aBuy && buyPriceVolume.get(aBuy).getLeft() <= buyPrice){
+                buyVolume = buyPriceVolume.get(aBuy).getRight();
+                aBuy++;
+            }
+
+            if(sellPriceVolume.size() > aSell && sellPriceVolume.get(aSell).getLeft() <= sellPrice){
+                sellVolume = sellPriceVolume.get(aSell).getRight();
+                aSell++;
+            }
+            volumeArray[i] = new ImmutablePair<>(buyVolume, sellVolume);
+        }
+        this.volumeArray = volumeArray;
     }
 
 
@@ -205,19 +235,30 @@ public class OrderBook {
         return list;
     }
 
-    public double getBuyVolume() {
-        return buyVolume;
+
+    public double getBuyVolume(int diff){
+        diff = Math.min(199, diff);
+        diff = Math.max(0, diff);
+        return  this.volumeArray[diff].getLeft();
     }
 
-    public double getBuyVolume100() {
-        return buyVolume100;
+    public double getSellVolume(int diff) {
+        diff = Math.min(199, diff);
+        diff = Math.max(0, diff);
+        return  this.volumeArray[diff].getRight();
     }
 
-    public double getSellVolume100() {
-        return sellVolume100;
-    }
 
-    public double getSellVolume() {
-        return sellVolume;
+    public double getVolume(int diff) {
+        diff = Math.min(199, diff);
+        diff = Math.max(0, diff);
+        Pair<Double, Double> p = this.volumeArray[diff];
+        Double result = 0.0;
+        try{
+            result = round(p.getLeft()/p.getRight() * 100);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return  result;
     }
 }

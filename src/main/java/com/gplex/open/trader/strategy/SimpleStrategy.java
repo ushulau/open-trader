@@ -78,7 +78,11 @@ public class SimpleStrategy implements TickSubscriber {
 
                     if (tickerMessage.getPrice().subtract(order.getPrice()).doubleValue() >= 0.3) {
                         logger.debug("canceling order because of beeing not in range");
-                        orderService.cancelOrder(order);
+                        try {
+                            orderService.cancelOrder(order);
+                        } catch (OrderException e) {
+                            logger.error("{}", e.getMessage());
+                        }
                         openOrders.remove(order.getId());
                     }
 
@@ -99,7 +103,11 @@ public class SimpleStrategy implements TickSubscriber {
                     //createAcounter offer for sell
 
                     if ("buy".equalsIgnoreCase(fill.getSide())) {
-                        OrderResponse sellOrder = orderService.sellOrder(fill.getProductId(), round(Math.max(fill.getPrice().doubleValue(), tickerMessage.getPrice().doubleValue()) + 0.02), fill.getSize().doubleValue());
+                        try {
+                            OrderResponse sellOrder = orderService.sellOrder(fill.getProductId(), round(Math.max(fill.getPrice().doubleValue(), tickerMessage.getPrice().doubleValue()) + 0.02), fill.getSize().doubleValue());
+                        } catch (OrderException e) {
+                            logger.error("{}", e.getMessage());
+                        }
                         logger.debug("{} reverse sell order created");
                     }
 
@@ -127,6 +135,8 @@ public class SimpleStrategy implements TickSubscriber {
                     try {
                         order = orderService.buyOrder(Const.Products.LTC_USD, round(tickerMessage.getPrice().doubleValue() - 0.01), 0.01);
 
+                    } catch (OrderException e) {
+                        logger.error("{}", e.getMessage());
                     } finally {
                         if (order != null) {
                             logger.debug("opened order {}", order);
@@ -156,6 +166,11 @@ public class SimpleStrategy implements TickSubscriber {
     @Override
     public void onUpdate(OrderBook ob) {
         throw new RuntimeException("Not implemented");
+    }
+
+    @Override
+    public void onHeartbeat() {
+
     }
 
     private void initOpenOrders() {

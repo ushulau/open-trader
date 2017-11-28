@@ -111,16 +111,19 @@ public class BaseSecureClient {
     }
 
 
-    public <T> ResponseEntity<T> executePOST(String requestPath, Object body, Class<T> responseType) {
+    public <T> ResponseEntity<T> executePOST(String requestPath, Object body, Class<T> responseType) throws HttpStatusCodeException, Exception {
+       Exception exception;
         try {
             return restTemplate.exchange(requestPath, HttpMethod.POST, createPOSTRequest(requestPath, body), responseType);
 
         } catch (HttpStatusCodeException e) {
             logger.error("Unable to get response due to [" + e.getResponseBodyAsString() + "]");
+            exception = e;
         } catch (Exception ex) {
             logger.error("Unable to get response due to [" + ex.getMessage() + "]", ex);
+            exception = ex;
         }
-        return null;
+        throw  exception ;
     }
 
 

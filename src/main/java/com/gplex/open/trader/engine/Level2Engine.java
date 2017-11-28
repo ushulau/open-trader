@@ -69,7 +69,9 @@ public class Level2Engine {
        exec.scheduleAtFixedRate(() -> {
             long c =  counter.longValue();
             if(c == lastCounter){
-                logger.warn("SOCKET is STALE RESUBSCRIBING...");
+                logger.warn("\n+------------------------------------------+" +
+                            "\n|      SOCKET is STALE RESUBSCRIBING...    |" +
+                            "\n+------------------------------------------+");
                 //todo need to resubscribe
                 client.close();
                 t[0].interrupt();
@@ -80,7 +82,25 @@ public class Level2Engine {
                 t[0].start();
 
             }else {
-                logger.info("HEARTBEAT: [{}]", c);
+                try {
+                    orderBook.getPressure();
+                    logger.info(
+                            "\n+----------------------------------------+\n" +
+                                    "|" + Utils.padSpace("HEARTBEAT: [" + c + "]", 40) + "|\n" +
+                                    "|" + Utils.padSpace("Current price -> $" + orderBook.getList().get(orderBook.getCurrentMiddlePoint()).getPrice(), 40) + "|\n" +
+                                    "|" + Utils.padSpace("$0.5 range buy pressure -> " + orderBook.getVolume(50) + "%", 40) + "|\n" +
+                                    "|" + Utils.padSpace("$1.0 range buy pressure -> " + orderBook.getVolume(100) + "%", 40) + "|\n" +
+                                    "|" + Utils.padSpace("$2.0 range buy pressure -> " + orderBook.getVolume(200) + "%", 40) + "|\n" +
+                                    "+----------------------------------------+");
+                }catch (Exception e){
+                    logger.error("Heartbeat error [{}]", e);
+                }
+
+                try {
+                    tickSubscriber.onHeartbeat();
+                }catch (Exception e){
+                    logger.error("ticksubscriber on heartbeat error \n{}", e);
+                }
             }
 
             lastCounter = c;

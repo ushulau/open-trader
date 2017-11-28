@@ -2,6 +2,7 @@ package com.gplex.open.trader.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.gplex.open.trader.constant.Const;
+import com.gplex.open.trader.domain.OrderException;
 import com.gplex.open.trader.domain.OrderResponse;
 import com.gplex.open.trader.utils.Utils;
 import org.junit.Test;
@@ -31,14 +32,12 @@ public class OrderServiceImplTestHarness {
 
 
     @Test
-    public void testOrder() throws JsonProcessingException {
+    public void testOrder() throws JsonProcessingException, OrderException {
         for (int i = 0; i <= 100; i++) {
             OrderResponse response = orderService.buyOrder(Const.Products.BTC_USD, Utils.round(Math.random() * 10000.0), 1.0);
             OrderResponse sellResponse = orderService.sellOrder(Const.Products.BTC_USD, Utils.round(Math.random() * 10000.0 + 1000.0), 1.0);
             logger.debug("\n{}\n{}", new Object[]{Utils.MAPPER.writeValueAsString(response), Utils.MAPPER.writeValueAsString(sellResponse)});
         }
-
-
     }
 
 
@@ -53,7 +52,7 @@ public class OrderServiceImplTestHarness {
 
 
     @Test
-    public void testCancelFirsrOrder() throws JsonProcessingException {
+    public void testCancelFirsrOrder() throws JsonProcessingException, OrderException {
         List<OrderResponse> response = orderService.listOrders();
         if (response.size() > 0) {
            logger.debug("Order [{}] is {}canceled", response.get(0).getId(), orderService.cancelOrder(response.get(0))?"":"NOT ");
@@ -72,7 +71,7 @@ public class OrderServiceImplTestHarness {
 
 
     @Test
-    public void testCreateAndCancel() throws JsonProcessingException {
+    public void testCreateAndCancel() throws JsonProcessingException, OrderException {
         for (int i = 0; i <= 100; i++) {
             OrderResponse response = orderService.buyOrder(Const.Products.BTC_USD, Utils.round(Math.random() * 10000.0), 1.0);
             OrderResponse sellResponse = orderService.sellOrder(Const.Products.BTC_USD, Utils.round(Math.random() * 10000.0 + 1000.0), 1.0);

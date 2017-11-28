@@ -1,6 +1,7 @@
 package com.gplex.open.trader.service;
 
 import com.gplex.open.trader.domain.Order;
+import com.gplex.open.trader.domain.OrderException;
 import com.gplex.open.trader.domain.OrderResponse;
 import com.gplex.open.trader.rest.BaseSecureClient;
 import com.gplex.open.trader.utils.Security;
@@ -27,7 +28,6 @@ import static java.util.stream.Collectors.toList;
 public class OrderServiceImpl extends BaseSecureClient {
 
     private static final Logger logger = LoggerFactory.getLogger(OrderServiceImpl.class);
-
     private final String baseUrl;
 
     public OrderServiceImpl(RestTemplate restTemplate, Security sec, String key, String passphrase, String baseUrl) {
@@ -35,12 +35,12 @@ public class OrderServiceImpl extends BaseSecureClient {
         this.baseUrl = baseUrl;
     }
 
-    public OrderResponse buyOrder(String product, Double price, Double size) {
+    public OrderResponse buyOrder(String product, Double price, Double size) throws OrderException {
         Order order = new Order(product, BUY, price, size);
         return executeOrder(order);
     }
 
-    public OrderResponse sellOrder(String product, Double price, Double size) {
+    public OrderResponse sellOrder(String product, Double price, Double size) throws OrderException {
         Order order = new Order(product, SELL, price, size);
         return executeOrder(order);
     }
@@ -104,11 +104,11 @@ public class OrderServiceImpl extends BaseSecureClient {
     }
 
 
-    public boolean cancelOrder(OrderResponse order) {
+    public boolean cancelOrder(OrderResponse order) throws OrderException {
         return !(order == null || StringUtils.isBlank(order.getId())) && cancelOrder(order.getId());
     }
 
-    public boolean cancelOrder(String id) {
+    public boolean cancelOrder(String id) throws OrderException {
         String requestPath = this.baseUrl + "/orders";
         if(StringUtils.isBlank(id)){
             return false;
@@ -121,11 +121,11 @@ public class OrderServiceImpl extends BaseSecureClient {
             return result.getStatusCode().is2xxSuccessful(); //return result.getBody();
         } catch (HttpStatusCodeException e) {
             logger.error("Unable to get response due to [" + e.getResponseBodyAsString() + "]");
+            throw new OrderException(e);
         } catch (Exception ex) {
             logger.error("Unable to get response due to [" + ex.getMessage() + "]", ex);
+            throw new OrderException(ex.getMessage());
         }
-        return false;
-        //return new ArrayList<>();
     }
 
     public void getOrder(OrderResponse order) {
@@ -148,19 +148,21 @@ public class OrderServiceImpl extends BaseSecureClient {
     }
 
 
-    private OrderResponse executeOrder(Order order) {
+    private OrderResponse executeOrder(Order order) throws OrderException {
         String requestPath = this.baseUrl + "/orders";
         try {
             ResponseEntity<OrderResponse> result = executePOST(requestPath, order, OrderResponse.class);
-            if(result != null && result.getStatusCode().is2xxSuccessful()){
+            if (result != null && result.getStatusCode().is2xxSuccessful()) {
                 logger.info("{}", result.getBody());
             }
-
-            return result != null ?result.getBody(): null;
+            return result.getBody();
+        } catch (HttpStatusCodeException ex) {
+            logger.error("Unable to get response due to [" + ex.getResponseBodyAsString() + "]");
+            throw new OrderException(ex);
         } catch (Exception e) {
             logger.error("", e);
+            throw new OrderException(e.getMessage());
         }
-        return null;
     }
 
 

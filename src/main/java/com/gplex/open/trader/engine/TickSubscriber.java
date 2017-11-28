@@ -10,5 +10,6 @@ public interface TickSubscriber {
 
     void onTick(Engine engine, TickerMessage tickerMessage);
     void onUpdate(OrderBook ob);
+    void onHeartbeat();
 
 }
