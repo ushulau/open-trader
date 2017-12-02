@@ -23,6 +23,13 @@ public class Utils {
         return Double.valueOf(String.format("%.2f", value));
     }
 
+    public static double round4(double value) {
+        return Double.valueOf(String.format("%.4f", value));
+    }
+    public static double round8(double value) {
+        return Double.valueOf(String.format("%.8f", value));
+    }
+
     public static String intervalString(Long elapsedTime) {
         Duration duration = Duration.ofMillis(elapsedTime);
         return duration.toString()

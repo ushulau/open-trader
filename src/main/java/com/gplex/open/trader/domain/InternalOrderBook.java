@@ -41,16 +41,16 @@ public class InternalOrderBook{
     }
 
     public Set<String> getOpenBuy() {
-        return openBuy;
+        return new HashSet<>(openBuy);
     }
 
     public Set<String> getOpen() {
-        return open;
+        return new HashSet<>(open);
     }
 
 
     public Set<String> getOpenSell() {
-        return openSell;
+        return new HashSet<>(openSell);
     }
 
     public Map<String, String> getBuySellMap() {

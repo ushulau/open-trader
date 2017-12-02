@@ -117,8 +117,9 @@ public class OrderServiceImpl extends BaseSecureClient {
         logger.debug("canceling order ... [{}]", id);
         try {
             ResponseEntity<String> result = executeDELETE(requestPath, String.class);
-            logger.debug("{}", result.getBody());
-            return result.getStatusCode().is2xxSuccessful(); //return result.getBody();
+            boolean canceled = result.getStatusCode().is2xxSuccessful();
+            logger.debug("order [{}] canceled -> {}", id, canceled );
+            return canceled; //return result.getBody();
         } catch (HttpStatusCodeException e) {
             logger.error("Unable to get response due to [" + e.getResponseBodyAsString() + "]");
             throw new OrderException(e);
